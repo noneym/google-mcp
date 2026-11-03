@@ -136,7 +136,7 @@ export async function startLogin(timeoutMs = 5 * 60_000): Promise<LoginSession> 
   const client = newOAuthClient(creds, redirectUri);
   const url = client.generateAuthUrl({
     access_type: 'offline',
-    prompt: 'consent',
+    prompt: 'select_account consent',
     include_granted_scopes: true,
     scope: SCOPES,
     state,
