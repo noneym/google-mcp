@@ -1,12 +1,13 @@
 # google-mcp
 
-Google servisleri için MCP sunucusu. İlk etap: **Google Analytics 4** (Admin API + Data API).
+Google servisleri için MCP sunucusu: **Google Analytics 4** (Admin API + Data API) ve **Search Console** (+ Site Verification API).
 
 - Hesap / property / data stream oluşturma, güncelleme, silme
 - Web sitesi için tek adımda property + stream kurup **G- ölçüm kimliği** ve gtag.js snippet'i alma
 - Ziyaretçi sayıları, günlük kırılım, önceki dönemle karşılaştırma, realtime, hazır raporlar (sayfalar, kaynaklar, ülkeler, cihazlar…)
 - Key event, custom dimension/metric, data retention, kullanıcı yetkileri, Measurement Protocol secret
-- Kapsanmayan her şey için ham API çağrısı: `ga_admin_api`, `ga_data_api`
+- Search Console: site listeleme, ekleme + sahiplik doğrulama (DNS/meta/dosya/Analytics), tıklama/gösterim/CTR/pozisyon, en çok aranan sorgular ve sayfalar, sitemap gönderme, URL indeks kontrolü
+- Kapsanmayan her şey için ham API çağrısı: `ga_admin_api`, `ga_data_api`, `gsc_api`
 
 ## Kurulum
 
@@ -18,7 +19,7 @@ npm run build
 ### 1. Google Cloud OAuth client
 
 1. [Google Cloud Console](https://console.cloud.google.com/) → bir proje seç/oluştur.
-2. **APIs & Services → Library**: `Google Analytics Admin API` ve `Google Analytics Data API` etkinleştir.
+2. **APIs & Services → Library**: `Google Analytics Admin API`, `Google Analytics Data API`, `Google Search Console API` ve `Site Verification API` etkinleştir.
 3. **OAuth consent screen**: External, kendi e-postanı *Test users*'a ekle (veya uygulamayı yayınla — test modunda refresh token 7 günde düşer).
 4. **Credentials → Create credentials → OAuth client ID → Desktop app**. JSON'ı indir ve şuraya koy:
    - `~/.google-mcp/client_secret.json` (Windows: `C:\Users\<sen>\.google-mcp\client_secret.json`)
@@ -88,9 +89,12 @@ claude mcp add --transport http google https://<domain>/mcp --header "Authorizat
 
 **Raporlar:** `ga_get_visitors`, `ga_realtime`, `ga_quick_report`, `ga_run_report`, `ga_run_realtime_report`, `ga_get_metadata`, `ga_visitors_all_properties`
 
-**Ham API:** `ga_admin_api` (v1beta/v1alpha), `ga_data_api`
+**Search Console:** `gsc_list_sites`, `gsc_get_verification_token`, `gsc_verify_and_add_site`, `gsc_add_site`, `gsc_remove_site`, `gsc_performance`, `gsc_search_analytics`, `gsc_list_sitemaps`, `gsc_submit_sitemap`, `gsc_delete_sitemap`, `gsc_inspect_url`
+
+**Ham API:** `ga_admin_api` (v1beta/v1alpha), `ga_data_api`, `gsc_api` (searchconsole / siteverification)
 
 ## Notlar
 
 - **Hesap oluşturma**: Google, yeni GA hesabı için kullanıcının Hizmet Şartları'nı tarayıcıda onaylamasını zorunlu tutar. `ga_create_account` bir `termsOfServiceUrl` döner; onaylanınca hesap oluşur. `redirectUri` OAuth client'ında izinli olmalı — Desktop client ile hata alırsan bir **Web application** client'ı oluşturup o adresi *Authorized redirect URIs*'e ekle ve `GA_PROVISION_REDIRECT_URI` olarak ver. Pratikte hesabı bir kez GA arayüzünden açıp, property/stream işlerini MCP'ye bırakmak en kolayı.
+- Search Console verisi ~2 gün gecikmeli gelir; varsayılan bitiş tarihi `yesterday`. URL'yi indekslemeye gönderme API'de yok, sadece arayüzde.
 - Yeni Google servisleri eklendiğinde `src/auth.ts` içindeki `SCOPES` genişler; ardından `npm run login` tekrar çalıştırılmalı.

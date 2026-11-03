@@ -19,6 +19,8 @@ export const SCOPES = [
   'https://www.googleapis.com/auth/analytics.edit',
   'https://www.googleapis.com/auth/analytics.manage.users',
   'https://www.googleapis.com/auth/analytics.provision',
+  'https://www.googleapis.com/auth/webmasters',
+  'https://www.googleapis.com/auth/siteverification',
 ];
 
 export const HOME = process.env.GOOGLE_MCP_HOME || join(homedir(), '.google-mcp');

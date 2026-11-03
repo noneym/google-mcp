@@ -22,6 +22,8 @@
   "dependencies": {
     "@googleapis/analyticsadmin": "^22.0.1",
     "@googleapis/analyticsdata": "^10.1.1",
+    "@googleapis/searchconsole": "^11.0.1",
+    "@googleapis/siteverification": "^10.0.1",
     "@modelcontextprotocol/sdk": "^1.32.2",
     "zod": "^4.6.7"
   },

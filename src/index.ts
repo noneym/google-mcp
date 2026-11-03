@@ -6,6 +6,7 @@ import { registerDataTools } from './analytics/data.js';
 import { authStatus, logout, openBrowser, startLogin } from './auth.js';
 import { z } from 'zod';
 import { serveHttp } from './http.js';
+import { registerSearchConsoleTools } from './searchconsole/tools.js';
 import { defineTool } from './util.js';
 
 function buildServer(remote = false) {
@@ -13,7 +14,7 @@ function buildServer(remote = false) {
     { name: 'google-mcp', version: '0.1.0' },
     {
       instructions:
-        'Google services. Analytics: start with ga_list_account_summaries to find account/property ids; ga_setup_website creates a property + web stream and returns the G- id; ga_get_visitors / ga_realtime / ga_quick_report read traffic. If a call says not logged in, call google_login and give the user the URL. Deleting accounts/properties/streams needs explicit user confirmation.',
+        'Google services. Analytics (ga_*): start with ga_list_account_summaries to find account/property ids; ga_setup_website creates a property + web stream and returns the G- id; ga_get_visitors / ga_realtime / ga_quick_report read traffic. Search Console (gsc_*): gsc_list_sites, gsc_performance for clicks/impressions/queries, gsc_inspect_url for index status; a new site is added with gsc_get_verification_token then gsc_verify_and_add_site. If a call says not logged in, call google_login and give the user the URL. Deleting accounts/properties/streams needs explicit user confirmation.',
     },
   );
 
@@ -28,6 +29,7 @@ function buildServer(remote = false) {
   if (!remote) registerLocalAuthTools(server);
   registerAdminTools(server);
   registerDataTools(server);
+  registerSearchConsoleTools(server);
   return server;
 }
 

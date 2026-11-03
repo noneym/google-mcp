@@ -3,7 +3,7 @@ import { analyticsdata } from '@googleapis/analyticsdata';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { getAuthClient } from '../auth.js';
-import { callByPath, defineTool, listAll, propertyName } from '../util.js';
+import { callByPath, defineTool, listAll, previousRange, propertyName } from '../util.js';
 
 const data = async () => analyticsdata({ version: 'v1beta', auth: await getAuthClient() });
 
@@ -101,7 +101,8 @@ export function registerDataTools(server: McpServer) {
         const prev = previousRange(startDate, endDate);
         if (prev) dateRanges.push({ ...prev, name: 'previous' });
       }
-      const requests: any[] = [{ dateRanges, metrics, dimensions: dateRanges.length > 1 ? [{ name: 'dateRange' }] : [] }];
+      // With several ranges GA adds a dateRange column to each row by itself.
+      const requests: any[] = [{ dateRanges, metrics }];
       if (daily) {
         requests.push({
           dateRanges: [{ startDate, endDate }],
@@ -338,24 +339,4 @@ export function registerDataTools(server: McpServer) {
     { method: z.string(), params: z.record(z.string(), z.any()).default({}) },
     async ({ method, params }) => callByPath(await data(), method, params),
   );
-}
-
-/** For absolute YYYY-MM-DD ranges, the equally long range right before it. */
-function previousRange(start: string, end: string) {
-  const resolve = (s: string) => {
-    const now = new Date();
-    now.setUTCHours(0, 0, 0, 0);
-    if (s === 'today') return now;
-    if (s === 'yesterday') return new Date(now.getTime() - 86_400_000);
-    const rel = s.match(/^(\d+)daysAgo$/);
-    if (rel) return new Date(now.getTime() - Number(rel[1]) * 86_400_000);
-    const d = new Date(`${s}T00:00:00Z`);
-    return isNaN(d.getTime()) ? null : d;
-  };
-  const s = resolve(start);
-  const e = resolve(end);
-  if (!s || !e) return null;
-  const len = e.getTime() - s.getTime() + 86_400_000;
-  const fmt = (d: Date) => d.toISOString().slice(0, 10);
-  return { startDate: fmt(new Date(s.getTime() - len)), endDate: fmt(new Date(s.getTime() - 86_400_000)) };
 }

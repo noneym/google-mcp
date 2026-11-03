@@ -86,3 +86,35 @@ export const gtagSnippet = (measurementId: string) => `<!-- Google tag (gtag.js)
   gtag('js', new Date());
   gtag('config', '${measurementId}');
 </script>`;
+
+const DAY = 86_400_000;
+
+/** "today", "yesterday", "NdaysAgo" or YYYY-MM-DD → Date at UTC midnight (null if unparseable). */
+export function resolveDate(s: string): Date | null {
+  const now = new Date();
+  now.setUTCHours(0, 0, 0, 0);
+  if (s === 'today') return now;
+  if (s === 'yesterday') return new Date(now.getTime() - DAY);
+  const rel = s.match(/^(\d+)daysAgo$/);
+  if (rel) return new Date(now.getTime() - Number(rel[1]) * DAY);
+  const d = new Date(`${s}T00:00:00Z`);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+export const isoDate = (d: Date) => d.toISOString().slice(0, 10);
+
+/** Same as resolveDate but returns YYYY-MM-DD and throws on bad input (for APIs without relative dates). */
+export function absoluteDate(s: string) {
+  const d = resolveDate(s);
+  if (!d) throw new Error(`Invalid date "${s}" (use YYYY-MM-DD, today, yesterday or NdaysAgo)`);
+  return isoDate(d);
+}
+
+/** The equally long range right before [start, end]. */
+export function previousRange(start: string, end: string) {
+  const s = resolveDate(start);
+  const e = resolveDate(end);
+  if (!s || !e) return null;
+  const len = e.getTime() - s.getTime() + DAY;
+  return { startDate: isoDate(new Date(s.getTime() - len)), endDate: isoDate(new Date(s.getTime() - DAY)) };
+}
