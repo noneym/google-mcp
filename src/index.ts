@@ -66,7 +66,7 @@ function registerLocalAuthTools(server: McpServer) {
 async function main() {
   const cmd = process.argv[2];
   if (cmd === 'login') {
-    const { url, done } = await startLogin();
+    const { url, done } = await startLogin(15 * 60_000);
     console.log(`Tarayıcıda açılıyor (açılmazsa bu adrese git):\n\n${url}\n`);
     openBrowser(url);
     const email = await done;
