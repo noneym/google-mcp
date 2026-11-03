@@ -5,9 +5,10 @@ import { registerAdminTools } from './analytics/admin.js';
 import { registerDataTools } from './analytics/data.js';
 import { authStatus, logout, openBrowser, startLogin } from './auth.js';
 import { z } from 'zod';
+import { serveHttp } from './http.js';
 import { defineTool } from './util.js';
 
-function buildServer() {
+function buildServer(remote = false) {
   const server = new McpServer(
     { name: 'google-mcp', version: '0.1.0' },
     {
@@ -24,6 +25,14 @@ function buildServer() {
     async () => authStatus(),
   );
 
+  if (!remote) registerLocalAuthTools(server);
+  registerAdminTools(server);
+  registerDataTools(server);
+  return server;
+}
+
+/** Login/logout need a browser on this machine, so they are not offered over HTTP. */
+function registerLocalAuthTools(server: McpServer) {
   defineTool(
     server,
     'google_login',
@@ -50,10 +59,6 @@ function buildServer() {
       return { loggedOut: true };
     },
   );
-
-  registerAdminTools(server);
-  registerDataTools(server);
-  return server;
 }
 
 async function main() {
@@ -73,6 +78,10 @@ async function main() {
   if (cmd === 'logout') {
     logout();
     console.log('Token silindi.');
+    return;
+  }
+  if (cmd === 'serve' || process.env.MCP_TRANSPORT === 'http') {
+    serveHttp(() => buildServer(true));
     return;
   }
   await buildServer().connect(new StdioServerTransport());

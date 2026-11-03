@@ -48,6 +48,14 @@ veya `.mcp.json` / Claude Desktop config:
 }
 ```
 
+### Sunucuda (HTTP) çalıştırma
+
+`MCP_TRANSPORT=http` (veya `node dist/index.js serve`) ile Streamable HTTP sunucusu `:$PORT/mcp` adresinde açılır; her istek `Authorization: Bearer $MCP_AUTH_TOKEN` ister (`/health` hariç). Sunucuda tarayıcı olmadığı için girişi lokalde `npm run login` ile yapıp `~/.google-mcp/token.json` içindeki `refresh_token`'ı `GOOGLE_REFRESH_TOKEN` olarak verin. Dockerfile bu modda başlar.
+
+```bash
+claude mcp add --transport http google https://<domain>/mcp --header "Authorization: Bearer <MCP_AUTH_TOKEN>" -s user
+```
+
 ## Ortam değişkenleri
 
 | Değişken | Açıklama |
@@ -59,6 +67,9 @@ veya `.mcp.json` / Claude Desktop config:
 | `GOOGLE_MCP_TOKEN_FILE` | token.json yolu |
 | `GOOGLE_MCP_OAUTH_PORT` | Login callback portu (varsayılan rastgele) |
 | `GOOGLE_APPLICATION_CREDENTIALS` | Service account (OAuth yoksa). SA e-postası GA'da kullanıcı olarak eklenmeli; hesap oluşturamaz. |
+| `MCP_TRANSPORT` | `http` ise HTTP sunucusu (varsayılan stdio) |
+| `PORT` | HTTP portu (varsayılan 3000) |
+| `MCP_AUTH_TOKEN` | HTTP modunda zorunlu bearer token (min 16 karakter) |
 | `GA_PROVISION_REDIRECT_URI` | `ga_create_account` için ToS sonrası yönlendirme adresi |
 
 ## Araçlar
